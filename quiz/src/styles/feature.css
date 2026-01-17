@@ -210,6 +210,21 @@
   cursor: default;
   box-shadow: none;
 }
+
+.subscribe-btn {
+  background-color: #1e90ff;
+  color: white;
+}
+
+.unsubscribe-btn {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.subscribe-btn:hover, .unsubscribe-btn:hover {
+  opacity: 0.8;
+}
+
 /* Mobile & Base Styles */
 .hero-visual {
   flex: 1;
