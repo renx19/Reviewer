@@ -3,7 +3,7 @@ import { apiRequest } from '../utils/api';
 
 const PREFIX = '/auth'; // prefix all auth routes
 
-export const login = async (email, password) => {
+export const loginService = async (email, password) => {
   return apiRequest(`${PREFIX}/login`, {
     method: 'POST',
     body: { email, password },
@@ -11,7 +11,7 @@ export const login = async (email, password) => {
 };
 
 // ✅ Fixed logout
-export const logout = async () => {
+export const logoutService = async () => {
   // use apiRequest directly with credentials included
   // or fetch with API_BASE
   const res = await fetch(`${import.meta.env.VITE_API_URL}${PREFIX}/logout`, {
