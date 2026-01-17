@@ -31,7 +31,13 @@ export const refreshToken = async () => {
   return apiRequest(`${PREFIX}/refresh`, { method: 'POST' });
 };
 
-// Get the authenticated user's profile
-export const getProfile = async () => {
-  return apiRequest(`${PREFIX}/profile`, { method: 'GET' });
+
+// Old Service storing token in cookies only
+// Get the authenticated user's profile t
+// export const getProfile = async () => {
+//   return apiRequest(`${PREFIX}/profile`, { method: 'GET' });
+// };
+
+export const getProfile = async (accessToken, setAccessToken) => {
+  return apiRequest("/auth/profile", { method: "GET" }, accessToken, setAccessToken);
 };

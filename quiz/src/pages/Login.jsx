@@ -17,7 +17,7 @@ const LoginModal = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { setUser } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -75,7 +75,7 @@ const LoginModal = () => {
       await loginService(email, password);
 
       // ✅ use API service (correct base URL + refresh handling)
-      const profile = await getProfile();
+      const profile = await getProfile(user?.accessToken, setUser);
       setUser(profile.user);
 
       const from = location.state?.from?.pathname || "/todos";
