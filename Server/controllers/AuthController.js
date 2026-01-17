@@ -8,8 +8,11 @@ const jwt = require('jsonwebtoken');
 const cookieOptions = {
   httpOnly: true,
   secure: true,     // required for HTTPS (Render)
-  sameSite: "None", // required for mobile cross-site cookies
+  sameSite: "Lax", // required for mobile cross-site cookies
   path: '/',
+  // domain: ".onrender.com"
+   domain: ".vercel.app",
+
 };
 
 // =========================
