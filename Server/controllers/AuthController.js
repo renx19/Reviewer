@@ -5,23 +5,23 @@ const jwt = require('jsonwebtoken');
 // =========================
 // COOKIE CONFIG (LIVE)
 // =========================
-// const cookieOptions = {
-//   httpOnly: true,
-//   secure: true,     // required for HTTPS (Render)
-//   sameSite: "None", // required for mobile cross-site cookies
-//   path: '/',
-// };
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,     // required for HTTPS (Render)
+  sameSite: "None", // required for mobile cross-site cookies
+  path: '/',
+};
 
 // =========================
 // LOCAL DEV VERSION (COMMENTED)
 // =========================
 
-const cookieOptions = {
-  httpOnly: true,
-  secure: false,
-  sameSite: "Lax",
-  path: '/',
-};
+// const cookieOptions = {
+//   httpOnly: true,
+//   secure: false,
+//   sameSite: "Lax",
+//   path: '/',
+// };
 
 
 // =========================
