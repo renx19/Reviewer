@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const notesRoutes = require("./routes/notes");
 const todosRoutes = require("./routes/todos");
@@ -13,20 +13,8 @@ const pushRoutes = require("./routes/push");
 const cron = require("node-cron");
 const { sendDailyReminder } = require("./controllers/notificationController");
 
-// Daily reminder at 8:00 AM
-cron.schedule("0 8 * * *", async () => {
-  console.log("Running daily 8 AM reminder...");
-  await sendDailyReminder();
-});
-
-// Every 6 hours between 8AM and 8PM (8AM, 2PM, 8PM)
-cron.schedule("0 8,14,20 * * *", async () => {
-  console.log("Running 6-hour interval reminder...");
-  await sendDailyReminder();
-});
-
-
 const app = express();
+
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL,
@@ -34,8 +22,14 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
 // Connect DB
 connectDB();
+
+// Root route
+app.get("/", (req, res) => {
+  res.json({ message: "Reviewer API is up and running 🚀" });
+});
 
 // Routes
 app.use("/notes", notesRoutes);
@@ -45,7 +39,21 @@ app.use("/flashcards", flashcardRoutes);
 app.use("/auth", authRoutes);
 app.use("/password", passwordRoutes);
 app.use("/push", pushRoutes);
+
+// Only run cron in dev or a persistent server
+if (process.env.NODE_ENV !== "production") {
+  cron.schedule("0 8 * * *", async () => {
+    console.log("Running daily 8 AM reminder...");
+    await sendDailyReminder();
+  });
+
+  cron.schedule("0 8,14,20 * * *", async () => {
+    console.log("Running 6-hour interval reminder...");
+    await sendDailyReminder();
+  });
+}
+
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on port ${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
