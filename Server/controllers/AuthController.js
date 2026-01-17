@@ -1,4 +1,3 @@
-// controller/userController.js
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -6,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // =========================
 // Refresh Access Token
 // =========================
-exports.refreshToken = async (req, res) => {
+const refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
 
@@ -30,14 +29,12 @@ exports.refreshToken = async (req, res) => {
       { expiresIn: '15m' }
     );
 
-    // Set access token cookie
-
     const isProd = process.env.NODE_ENV === 'production';
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: isProd,              // only secure in production
-      sameSite: isProd ? 'None' : 'Lax', // use Lax for localhost
+      secure: isProd,
+      sameSite: isProd ? 'None' : 'Lax',
       path: '/',
       maxAge: 15 * 60 * 1000,
     });
@@ -52,7 +49,7 @@ exports.refreshToken = async (req, res) => {
 // =========================
 // Login User
 // =========================
-exports.loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -66,14 +63,14 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials.' });
     }
 
-    // Create access token (for cookies)
+    // Create access token
     const accessToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
       { expiresIn: '15m' }
     );
 
-    // Create refresh token (stored in DB)
+    // Create refresh token
     const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_REFRESH_SECRET,
@@ -88,8 +85,8 @@ exports.loginUser = async (req, res) => {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: isProd,              // only secure in production
-      sameSite: isProd ? 'None' : 'Lax', // use Lax for localhost
+      secure: isProd,
+      sameSite: isProd ? 'None' : 'Lax',
       path: '/',
       maxAge: 15 * 60 * 1000,
     });
@@ -112,7 +109,7 @@ exports.loginUser = async (req, res) => {
 // =========================
 // Logout User
 // =========================
-exports.logoutUser = async (req, res) => {
+const logoutUser = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
@@ -143,7 +140,7 @@ exports.logoutUser = async (req, res) => {
 // =========================
 // Create User
 // =========================
-exports.createUser = async (req, res) => {
+const createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
@@ -161,4 +158,33 @@ exports.createUser = async (req, res) => {
     console.error(err);
     return res.status(500).json({ error: 'Error creating user.', message: err.message });
   }
+};
+
+// =========================
+// Get Profile
+// =========================
+// const getProfile = async (req, res) => {
+//   try {
+    
+//     const user = req.user;
+
+//     res.json({
+//       id: user._id,
+//       name: user.name,
+//       email: user.email,
+    
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
+// Export all functions (CommonJS)
+module.exports = {
+  refreshToken,
+  loginUser,
+  logoutUser,
+  createUser,
+  // getProfile,
 };

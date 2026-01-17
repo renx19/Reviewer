@@ -9,7 +9,21 @@ const subjectRoutes = require("./routes/subject");
 const flashcardRoutes = require("./routes/flashcards");
 const authRoutes = require("./routes/auth");
 const passwordRoutes = require("./routes/password");
+const pushRoutes = require("./routes/push");
+const cron = require("node-cron");
+const { sendDailyReminder } = require("./controllers/notificationController");
 
+// Daily reminder at 8:00 AM
+cron.schedule("0 8 * * *", async () => {
+  console.log("Running daily 8 AM reminder...");
+  await sendDailyReminder();
+});
+
+// Every 6 hours between 8AM and 8PM (8AM, 2PM, 8PM)
+cron.schedule("0 8,14,20 * * *", async () => {
+  console.log("Running 6-hour interval reminder...");
+  await sendDailyReminder();
+});
 
 
 const app = express();
@@ -30,6 +44,7 @@ app.use("/subjects", subjectRoutes);
 app.use("/flashcards", flashcardRoutes);
 app.use("/auth", authRoutes);
 app.use("/password", passwordRoutes);
+app.use("/push", pushRoutes);
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () =>
   console.log(`🚀 Server running on port ${PORT}`)
