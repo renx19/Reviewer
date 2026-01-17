@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/login.css";
-import { login, getProfile } from "../services/authService";
+import { loginService, getProfile } from "../services/authService";
 import { useAuth } from "../context/authContext";
 import Loading from "../components/ui/loading"; // optional spinner
 
@@ -72,7 +72,7 @@ const LoginModal = () => {
     setError(null);
 
     try {
-      await login(email, password);
+      await loginService(email, password);
 
       // ✅ use API service (correct base URL + refresh handling)
       const profile = await getProfile();

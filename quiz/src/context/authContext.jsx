@@ -1,7 +1,9 @@
+
+// via cookies only
 // src/context/authContext.js
 import { createContext, useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getProfile, logout as logoutService, refreshToken } from "../services/authService";
+import { getProfile,  logoutService, refreshToken } from "../services/authService";
 
 const AuthContext = createContext(null);
 
