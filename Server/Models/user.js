@@ -9,5 +9,5 @@ const userSchema = new mongoose.Schema({
   resetTokenExpiration: { type: Date, default: null }, // Nullable expiration time
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.user || mongoose.model("user", userSchema);
 module.exports = User;

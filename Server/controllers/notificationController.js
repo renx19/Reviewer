@@ -1,6 +1,6 @@
 const Subscription = require("../Models/Subscription");
-const Flashcard = require("../models/FlashCard");
-const Todo = require("../models/Todo");
+const Flashcard = require("../Models/FlashCard");
+const Todo = require("../Models/Todo");
 const webpush = require("web-push");
 
 exports.sendDailyReminder = async () => {
