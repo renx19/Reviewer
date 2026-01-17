@@ -1,41 +1,25 @@
-
-// via cookies only
-// src/context/authContext.js
-import { createContext, useContext, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { getProfile,  logoutService, refreshToken } from "../services/authService";
+import { useState, useEffect, createContext, useContext } from "react";
+import { getProfile, refreshToken } from "../services/authService";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const location = useLocation();
   const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Check authentication on route change (skip public routes)
   useEffect(() => {
-    const skipRoutes = ["/", "/login",];
-    if (skipRoutes.includes(location.pathname)) {
-      setLoading(false);
-      return;
-    }
-
     const checkAuth = async () => {
       try {
-        const profile = await getProfile();
+        const profile = await getProfile(accessToken, setAccessToken);
         setUser(profile.user);
-      } catch (err) {
-        // Attempt silent refresh if refresh token exists
+      } catch {
         try {
-          setIsRefreshing(true);
-          await refreshToken(); // calls /auth/refresh using cookie
-          const profile = await getProfile(); // retry after refresh
+          await refreshToken(); // refresh cookie-based token
+          const profile = await getProfile(accessToken, setAccessToken);
           setUser(profile.user);
         } catch {
-          setUser(null); // user remains unauthenticated
-        } finally {
-          setIsRefreshing(false);
+          setUser(null);
         }
       } finally {
         setLoading(false);
@@ -43,21 +27,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
-  }, [location.pathname]);
-
-  // Logout helper
-  const logout = async () => {
-    try {
-      await logoutService(); // clears server-side session/cookie
-    } catch (err) {
-      console.error("Logout failed:", err.message);
-    } finally {
-      setUser(null);
-    }
-  };
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, logout, isRefreshing }}>
+    <AuthContext.Provider value={{ user, setUser, accessToken, setAccessToken, loading }}>
       {children}
     </AuthContext.Provider>
   );

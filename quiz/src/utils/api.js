@@ -1,4 +1,3 @@
-// src/utils/apiRequest.js
 export const apiRequest = async (endpoint, options = {}, accessToken = null, setAccessToken = null) => {
   const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -6,10 +5,10 @@ export const apiRequest = async (endpoint, options = {}, accessToken = null, set
     return fetch(`${API_BASE}${endpoint}`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...options.headers,
       },
-      credentials: "include", // refresh token cookie
+      credentials: "include", // sends cookies automatically
       ...options,
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
@@ -17,20 +16,22 @@ export const apiRequest = async (endpoint, options = {}, accessToken = null, set
 
   let res = await makeRequest();
 
-  // 🔁 If access token expired, try silent refresh
+  // 🔁 If 401, try refresh silently
   if (res.status === 401 && !endpoint.includes("/auth/refresh")) {
     if (!setAccessToken) throw new Error("Unauthorized and no token setter provided");
 
     try {
       const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
         method: "POST",
-        credentials: "include", // refresh token in httpOnly cookie
+        credentials: "include",
       });
 
       if (!refreshRes.ok) throw new Error("Refresh failed");
 
       const data = await refreshRes.json();
-      if (data.accessToken && setAccessToken) setAccessToken(data.accessToken);
+      if (data.accessToken && setAccessToken) {
+        setAccessToken(data.accessToken); // store in memory
+      }
 
       res = await makeRequest(); // retry original request
     } catch {
