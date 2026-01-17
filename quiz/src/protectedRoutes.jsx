@@ -1,16 +1,14 @@
 import { useAuth } from "./context/authContext";
 import { Navigate, useLocation } from "react-router-dom";
+import Loading from "./components/ui/loading";
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading, isRefreshing } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Show spinner while checking auth or refreshing token
-  if (loading || isRefreshing) return null; // or <Spinner />
+  if (loading) return <Loading />; // wait until AuthProvider finishes
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
 
   return children;
 };

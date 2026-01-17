@@ -4,7 +4,7 @@ import "../styles/login.css";
 import { loginService, getProfile } from "../services/authService";
 import { useAuth } from "../context/authContext";
 import Loading from "../components/ui/loading"; // optional spinner
-
+import { toast } from "react-toastify";
 const LoginModal = () => {
 
   const bodyRef = useRef(document.body);
@@ -19,11 +19,11 @@ const LoginModal = () => {
 
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
 
   // ===== Modal control =====
   const openModal = () => {
@@ -73,20 +73,26 @@ const LoginModal = () => {
 
     try {
       await loginService(email, password);
-
-      // ✅ use API service (correct base URL + refresh handling)
-      const profile = await getProfile(user?.accessToken, setUser);
+      const profile = await getProfile();
       setUser(profile.user);
-
-      const from = location.state?.from?.pathname || "/todos";
-      navigate(from, { replace: true });
+      closeModal();
+      navigate("/home", { replace: true });
     } catch (err) {
-      setError(err.message || "Login failed");
+      // Check if it's a user-related error
+      const message = err.message?.toLowerCase();
+      if (message?.includes("invalid") || message?.includes("required")) {
+        setError(err.message);
+      } else {
+        // For other errors, use toast
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
 
   };
+
+
 
   return (
     <div className="login-container" style={{ height: "200vh" }}>
@@ -139,7 +145,7 @@ const LoginModal = () => {
                 />
               </div>
 
-              {error && <p className="login-error">{error}</p>}
+            
 
               <div className="login-modal-buttons">
                 <a href="forgot-password" className="login-forgot-password">Forgot your password?</a>

@@ -7,6 +7,7 @@ export const loginService = async (email, password) => {
   return apiRequest(`${PREFIX}/login`, {
     method: 'POST',
     body: { email, password },
+  
   });
 };
 
@@ -38,6 +39,6 @@ export const refreshToken = async () => {
 //   return apiRequest(`${PREFIX}/profile`, { method: 'GET' });
 // };
 
-export const getProfile = async (accessToken, setAccessToken) => {
-  return apiRequest("/auth/profile", { method: "GET" }, accessToken, setAccessToken);
+export const getProfile = async () => {
+  return apiRequest("/auth/profile", { method: "GET" },);
 };
