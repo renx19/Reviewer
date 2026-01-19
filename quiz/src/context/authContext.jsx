@@ -59,32 +59,22 @@ export const AuthProvider = ({ children }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Try getting profile (web: cookies automatically)
-        const profile = await getProfile();
-        setUser(profile.user);
-        setAccessToken(profile.accessToken || null); // memory token for header clients
-      } catch {
+    if (user === null) {
+      // Only fetch profile for protected pages
+      const fetchProfile = async () => {
         try {
-          setIsRefreshing(true);
-          const refreshed = await refreshToken(); // refresh via cookie
-          const profile = await getProfile();
+          const profile = await getProfile(accessToken); // accessToken may be null
           setUser(profile.user);
-          setAccessToken(refreshed.accessToken || null);
+          setAccessToken(profile.accessToken || null);
         } catch {
           setUser(null);
           setAccessToken(null);
-        } finally {
-          setIsRefreshing(false);
         }
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    checkAuth();
-  }, []);
+      fetchProfile();
+    }
+  }, [user, accessToken]);
 
   const logout = async () => {
     try {

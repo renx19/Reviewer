@@ -74,15 +74,11 @@ const LoginModal = () => {
     try {
       const res = await loginService(email, password);
 
-      // Save user in context
+      // Save user in context only (no need to fetch profile immediately)
       setUser(res.user);
 
-      // Use the returned access token in apiRequest headers
-      const accessToken = res.accessToken;
-
-      // Example of immediately testing it:
-      const profile = await getProfile(accessToken);
-      console.log("Profile fetched with header token:", profile);
+      // Save accessToken in memory if returned (for API calls later)
+      setAccessToken(res.accessToken || null);
 
       closeModal();
       navigate("/home", { replace: true });
