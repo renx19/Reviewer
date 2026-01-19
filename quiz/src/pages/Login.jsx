@@ -17,7 +17,7 @@ const LoginModal = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { user, setUser, setAccessToken } = useAuth();
+  const { user, setUser, setAccessToken, set } = useAuth();
   const navigate = useNavigate();
 
   // Form state
@@ -66,6 +66,7 @@ const LoginModal = () => {
   }, []);
 
   // ===== Handle login submission =====
+  // ===== Handle login submission =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -73,19 +74,24 @@ const LoginModal = () => {
 
     try {
       const res = await loginService(email, password);
-
-      // Save user in context only (no need to fetch profile immediately)
       setUser(res.user);
-
-      // Save accessToken in memory if returned (for API calls later)
       setAccessToken(res.accessToken || null);
-
       closeModal();
       navigate("/home", { replace: true });
-
     } catch (err) {
-      toast.error(err.message || "Login failed");
+      // handle error from API
+      if (err.type === "user") {
+        setError({ message: err.error, type: "user" });
+      } else {
+        setError({
+          message: "Oops! Something went wrong. Please try again later.",
+          type: "system",
+        });
+      }
+
+      toast.error(err.error || "Login failed");
     } finally {
+      // ✅ always stop loading
       setLoading(false);
     }
   };
@@ -143,7 +149,9 @@ const LoginModal = () => {
                 />
               </div>
 
-              {error && <p className="login-error">{error}</p>}
+              {error && <p className={`login-error ${error.type}-error`}>{error.message}</p>}
+
+
 
 
               <div className="login-modal-buttons">

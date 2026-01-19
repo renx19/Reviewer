@@ -53,19 +53,48 @@ import { getProfile, refreshToken, logoutService } from "../services/authService
 
 const AuthContext = createContext(null);
 
+const LOCAL_STORAGE_USER_KEY = "user";
+const LOCAL_STORAGE_TOKEN_KEY = "accessToken";
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState(null); // memory only
-  const [loading, setLoading] = useState(true); // initially true, we are checking auth
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [accessToken, setAccessToken] = useState(() => {
+    return localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) || null;
+  });
+  const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // ✅ Run on mount to restore login
+  // Save to localStorage whenever user or token changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (accessToken) {
+      localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, accessToken);
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+    }
+  }, [accessToken]);
+
+  // Restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
       try {
         setIsRefreshing(true);
-        const refreshed = await refreshToken(); // uses refresh token cookie
+
+        // Try refreshing token first
+        const refreshed = await refreshToken();
         if (refreshed.accessToken) setAccessToken(refreshed.accessToken);
+
+        // Fetch profile to ensure user data is up to date
         const profile = await getProfile(refreshed.accessToken);
         setUser(profile.user);
       } catch (err) {
@@ -97,10 +126,10 @@ export const AuthProvider = ({ children }) => {
   const refreshAccessToken = async () => {
     setIsRefreshing(true);
     try {
-      const refreshed = await refreshToken(); // cookie sent automatically
+      const refreshed = await refreshToken();
       if (refreshed.accessToken) setAccessToken(refreshed.accessToken);
 
-      const profile = await getProfile(refreshed.accessToken); // ensure user updated
+      const profile = await getProfile(refreshed.accessToken);
       setUser(profile.user);
     } catch {
       setUser(null);
@@ -109,7 +138,6 @@ export const AuthProvider = ({ children }) => {
       setIsRefreshing(false);
     }
   };
-
 
   const logout = async () => {
     try {

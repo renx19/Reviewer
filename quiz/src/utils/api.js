@@ -70,6 +70,10 @@ export const apiRequest = async (endpoint, options = {}, accessToken = null) => 
   let data = null;
   if (contentType?.includes("application/json")) data = await res.json();
 
-  if (!res.ok) throw new Error(data?.error || res.statusText);
+  if (!res.ok) {
+    // ❌ Throw the backend JSON, not a plain Error
+    throw data || { error: res.statusText, type: "system" };
+  }
+
   return data;
 };
