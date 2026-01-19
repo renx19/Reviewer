@@ -157,6 +157,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs');
 const User = require("../Models/user");
+const { verifyAccessToken } = require("../middleware/authMiddleware");
 
 const cookieOptions = {
   httpOnly: true,
@@ -304,9 +305,23 @@ const logoutUser = async (req, res) => {
   }
 };
 
+
+
+// Example: optional authentication check
+const getProfile = async (req, res) => {
+  const user = await verifyAccessToken(req);
+  if (!user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  const safeUser = { _id: user._id, name: user.name, email: user.email };
+  res.json({ message: "User is authenticated!", user: safeUser });
+};
+
 module.exports = {
   createUser,
   loginUser,
   refreshToken,
   logoutUser,
+  getProfile
 };
