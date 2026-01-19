@@ -72,24 +72,26 @@ const LoginModal = () => {
     setError(null);
 
     try {
-      await loginService(email, password);
-      const profile = await getProfile();
-      setUser(profile.user);
+      const res = await loginService(email, password);
+
+      // Save user in context
+      setUser(res.user);
+
+      // Use the returned access token in apiRequest headers
+      const accessToken = res.accessToken;
+
+      // Example of immediately testing it:
+      const profile = await getProfile(accessToken);
+      console.log("Profile fetched with header token:", profile);
+
       closeModal();
       navigate("/home", { replace: true });
+
     } catch (err) {
-      // Check if it's a user-related error
-      const message = err.message?.toLowerCase();
-      if (message?.includes("invalid") || message?.includes("required")) {
-        setError(err.message);
-      } else {
-        // For other errors, use toast
-        toast.error("Something went wrong. Please try again.");
-      }
+      toast.error(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
-
   };
 
 
@@ -145,7 +147,8 @@ const LoginModal = () => {
                 />
               </div>
 
-            
+              {error && <p className="login-error">{error}</p>}
+
 
               <div className="login-modal-buttons">
                 <a href="forgot-password" className="login-forgot-password">Forgot your password?</a>

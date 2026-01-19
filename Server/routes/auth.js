@@ -14,4 +14,5 @@ router.get('/profile', authenticateUser, (req, res) => {
   res.json({ message: 'User is authenticated!', user: req.user });
 });
 
+
 module.exports = router;

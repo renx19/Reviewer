@@ -47,16 +47,18 @@
 //   return data;
 // };
 
+// services/api.js
 export const apiRequest = async (endpoint, options = {}, accessToken = null) => {
   const API_BASE = import.meta.env.VITE_API_URL;
 
   const res = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
+      // Attach Authorization header only if accessToken provided
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...options.headers,
     },
-    credentials: "include",
+    credentials: "include", // sends cookies automatically
     ...options,
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
