@@ -47,7 +47,7 @@
 
 // export const useAuth = () => useContext(AuthContext);
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { getProfile, refreshToken, logoutService } from "../services/authService";
 
 const AuthContext = createContext(null);
@@ -55,18 +55,37 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null); // memory only
-  const [loading, setLoading] = useState(false); // initially false
+  const [loading, setLoading] = useState(true); // initially true, we are checking auth
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Only fetch profile when needed (e.g., protected page)
+  // ✅ Run on mount to restore login
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        setIsRefreshing(true);
+        const refreshed = await refreshToken(); // uses refresh token cookie
+        if (refreshed.accessToken) setAccessToken(refreshed.accessToken);
+        const profile = await getProfile(refreshed.accessToken);
+        setUser(profile.user);
+      } catch (err) {
+        setUser(null);
+        setAccessToken(null);
+      } finally {
+        setIsRefreshing(false);
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, []);
+
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const profile = await getProfile(accessToken); // will try cookie or header
+      const profile = await getProfile(accessToken);
       setUser(profile.user);
       if (profile.accessToken) setAccessToken(profile.accessToken);
     } catch (err) {
-      console.warn("Not authenticated", err.message);
       setUser(null);
       setAccessToken(null);
     } finally {
@@ -79,9 +98,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const refreshed = await refreshToken();
       if (refreshed.accessToken) setAccessToken(refreshed.accessToken);
-      await fetchProfile(); // re-fetch profile after refresh
+      await fetchProfile();
     } catch (err) {
-      console.error("Refresh failed", err.message);
       setUser(null);
       setAccessToken(null);
     } finally {
