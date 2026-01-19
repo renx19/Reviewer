@@ -47,6 +47,7 @@
 
 // export const useAuth = () => useContext(AuthContext);
 
+
 import { createContext, useContext, useState, useEffect } from "react";
 import { getProfile, refreshToken, logoutService } from "../services/authService";
 
@@ -96,16 +97,19 @@ export const AuthProvider = ({ children }) => {
   const refreshAccessToken = async () => {
     setIsRefreshing(true);
     try {
-      const refreshed = await refreshToken();
+      const refreshed = await refreshToken(); // cookie sent automatically
       if (refreshed.accessToken) setAccessToken(refreshed.accessToken);
-      await fetchProfile();
-    } catch (err) {
+
+      const profile = await getProfile(refreshed.accessToken); // ensure user updated
+      setUser(profile.user);
+    } catch {
       setUser(null);
       setAccessToken(null);
     } finally {
       setIsRefreshing(false);
     }
   };
+
 
   const logout = async () => {
     try {
